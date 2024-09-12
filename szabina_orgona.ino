@@ -136,8 +136,8 @@ void update_leds(void) {
     digitalWrite(stops_addr_bus_A1, 1);
   }
 
+  digitalWrite(stops_addr_bus_DATA, 0);
   for (int i = 0; i < 2; i++) {   //2 unconnected pins
-    digitalWrite(stops_addr_bus_DATA, 0);
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
