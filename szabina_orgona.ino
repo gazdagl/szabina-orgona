@@ -5,25 +5,26 @@
 
 // Keyboards
 
-#define keyboard_data_bus_DB0 0  //input data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
-#define keyboard_data_bus_DB1 1
-#define keyboard_data_bus_DB2 2
-#define keyboard_data_bus_DB3 3
-#define keyboard_data_bus_DB4 4
-#define keyboard_data_bus_DB5 5
-#define keyboard_data_bus_DB6 6
-#define keyboard_data_bus_DB7 7
+#define input_data_bus_DB0 0
+#define input_data_bus_DB1 1
+#define input_data_bus_DB2 2
+#define input_data_bus_DB3 3
+#define input_data_bus_DB4 4
+#define input_data_bus_DB5 5
+#define input_data_bus_DB6 6
+#define input_data_bus_DB7 7
 
 #define keyboard_addr_bus_A0 8
 #define keyboard_addr_bus_A1 9
 #define keyboard_addr_bus_A2 10
-#define keyboard_addr_bus__E 11  //negált jelet alulvonással kezdem (!E=_E)
+#define keyboard_addr_bus__E_great 45  //negált jelet alulvonással kezdem (!E=_E)
+#define keyboard_addr_bus__E_swell 46
 
 
 
 // Pedals
 
-#define pedal_data_addr_bus_D0 12  //input data_addr bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
+#define pedal_data_addr_bus_D0 12
 #define pedal_data_addr_bus_D1 13
 #define pedal_data_addr_bus_D2 14
 #define pedal_data_addr_bus_D3 15
@@ -40,16 +41,6 @@
 
 
 // Stops                        (+transposer amit valszeg nem fogunk használni)
-
-#define stops_data_bus_DB0 24  //input data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
-#define stops_data_bus_DB1 25
-#define stops_data_bus_DB2 26
-#define stops_data_bus_DB3 27
-#define stops_data_bus_DB4 28
-#define stops_data_bus_DB5 29
-#define stops_data_bus_DB6 30
-#define stops_data_bus_DB7 31
-#define stops_data_bus__RST 32
 
 #define stops_addr_bus_A0 33
 #define stops_addr_bus_A1 34
@@ -104,11 +95,17 @@
 
 
 
-// LED-ek
+// LEDs
 byte stop_state[29] = { 0 };
 byte comb = 0;
 byte mix = 0;
 byte tutti = 0;
+
+
+
+// keys
+byte keys_cur[61];
+byte keys_last[61];
 
 
 
@@ -137,7 +134,7 @@ void update_leds(void) {
   }
 
   digitalWrite(stops_addr_bus_DATA, 0);
-  for (int i = 0; i < 2; i++) {   //2 unconnected pins
+  for (int i = 0; i < 2; i++) {  //2 unconnected pins
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
@@ -177,21 +174,28 @@ void update_leds(void) {
 }
 
 
+void update_keys(void) {
+  for (int i = 0; i < 2; i++) {
+
+  }
+}
+
 
 void pins_setup(void) {
-  pinMode(keyboard_data_bus_DB0, INPUT_PULLUP);
-  pinMode(keyboard_data_bus_DB1, INPUT_PULLUP);
-  pinMode(keyboard_data_bus_DB2, INPUT_PULLUP);
-  pinMode(keyboard_data_bus_DB3, INPUT_PULLUP);
-  pinMode(keyboard_data_bus_DB4, INPUT_PULLUP);
-  pinMode(keyboard_data_bus_DB5, INPUT_PULLUP);
-  pinMode(keyboard_data_bus_DB6, INPUT_PULLUP);
-  pinMode(keyboard_data_bus_DB7, INPUT_PULLUP);
+  pinMode(input_data_bus_DB0, INPUT_PULLUP);
+  pinMode(input_data_bus_DB1, INPUT_PULLUP);
+  pinMode(input_data_bus_DB2, INPUT_PULLUP);
+  pinMode(input_data_bus_DB3, INPUT_PULLUP);
+  pinMode(input_data_bus_DB4, INPUT_PULLUP);
+  pinMode(input_data_bus_DB5, INPUT_PULLUP);
+  pinMode(input_data_bus_DB6, INPUT_PULLUP);
+  pinMode(input_data_bus_DB7, INPUT_PULLUP);
 
   pinMode(keyboard_addr_bus_A0, OUTPUT);
   pinMode(keyboard_addr_bus_A1, OUTPUT);
   pinMode(keyboard_addr_bus_A2, OUTPUT);
-  pinMode(keyboard_addr_bus__E, OUTPUT);
+  pinMode(keyboard_addr_bus__E_great, OUTPUT);
+  pinMode(keyboard_addr_bus__E_swell, OUTPUT);
 
 
   pinMode(pedal_data_addr_bus_D0, INPUT_PULLUP);
@@ -208,15 +212,6 @@ void pins_setup(void) {
   pinMode(pedal_data_addr_bus__S4_2, OUTPUT);
   pinMode(pedal_data_addr_bus__S4_3, OUTPUT);
 
-
-  pinMode(stops_data_bus_DB0, INPUT_PULLUP);
-  pinMode(stops_data_bus_DB1, INPUT_PULLUP);
-  pinMode(stops_data_bus_DB2, INPUT_PULLUP);
-  pinMode(stops_data_bus_DB3, INPUT_PULLUP);
-  pinMode(stops_data_bus_DB4, INPUT_PULLUP);
-  pinMode(stops_data_bus_DB5, INPUT_PULLUP);
-  pinMode(stops_data_bus_DB6, INPUT_PULLUP);
-  pinMode(stops_data_bus_DB7, INPUT_PULLUP);
 
   pinMode(stops_addr_bus_A0, OUTPUT);
   pinMode(stops_addr_bus_A1, OUTPUT);
