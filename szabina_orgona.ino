@@ -24,7 +24,7 @@
 
 // Pedals
 
-#define pedal_addr_data_bus_D0 12
+#define pedal_addr_data_bus_D0 12     //egymást követő pineknek kell lenniük, növekvő sorrendben  
 #define pedal_addr_data_bus_D1 13
 #define pedal_addr_data_bus_D2 14
 #define pedal_addr_data_bus_D3 15
@@ -205,9 +205,9 @@ void set_A(int n) {
 
 
 
-void read_input_data_bus(byte* addr, int element, int n) {  //addr címen lévő tömb element-edik elemétől kezdve n (max 8) darab pin értékét írja be az input data bus-nak
+void read_bus(int bus_first_bit, byte* addr, int element, int n) {  //addr címen lévő tömb element-edik elemétől kezdve n (max 8) darab pin értékét írja be az input data bus-nak
   for (int i = 0; i < n && i < 8; i++) {
-    addr[element + i] = digitalRead(input_data_bus_DB0 + i);
+    addr[element + i] = digitalRead(bus_first_bit + i);
   }
 }
 
@@ -294,28 +294,29 @@ void update_stops_cur(void) {
 
   for (int j = 0; j < 3; j++) {
     set_A(j);
-    read_input_data_bus(stops_cur, 8 * j, 8);
+    read_bus(input_data_bus_DB0, stops_cur, 8 * j, 8);
   }
   set_A(3);
-  read_input_data_bus(stops_cur, 8 * 3, 5);
+  read_bus(input_data_bus_DB0, stops_cur, 8 * 3, 5);
 
   digitalWrite(stops_addr_bus__E, 1);
 }
 
 
 void update_keys_cur(void) {
-  for (int i = 1; i <= 2; i++) {
-    if (i == 1)
+  for (int i = 0; i < 2; i++) {
+    if (i == 0)
       digitalWrite(keyboard_addr_bus__E_great, 0);
     else
       digitalWrite(keyboard_addr_bus__E_swell, 0);
 
     for (int j = 0; j < 7; j++) {
       set_A(j);
-      read_input_data_bus(keys_cur[i], 8 * j, 8);
+      read_bus(input_data_bus_DB0, keys_cur[i], 8 * j, 8);
     }
+
     set_A(7);
-    read_input_data_bus(keys_cur[i], 8 * 7, 5);
+    read_bus(input_data_bus_DB0, keys_cur[i], 8 * 7, 5);
 
     digitalWrite(keyboard_addr_bus__E_great, 1);
     digitalWrite(keyboard_addr_bus__E_swell, 1);
@@ -326,12 +327,12 @@ void update_keys_cur(void) {
 void update_peds_cur(void) {
   for (int i = 0; i < 3; i++) {
     digitalWrite(pedal_addr_data_bus__S4_0 + i, 0);
-    read_input_data_bus(peds_cur, 8 * i, 8);
+    read_bus(pedal_addr_data_bus_D0, peds_cur, 8 * i, 8);
     digitalWrite(pedal_addr_data_bus__S4_0 + i, 1);
   }
 
   digitalWrite(pedal_addr_data_bus__S4_3, 0);
-  read_input_data_bus(peds_cur, 8 * 3, 6);
+  read_bus(pedal_addr_data_bus_D0, peds_cur, 8 * 3, 6);
   digitalWrite(pedal_addr_data_bus__S4_3, 1);
 }
 
