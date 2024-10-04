@@ -5,8 +5,8 @@
 
 // Keyboards
 
-#define input_data_bus_DB0 0  //egymást követő pineknek kell lenniük, növekvő sorrendben
-#define input_data_bus_DB1 1
+#define input_data_bus_DB0 24  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define input_data_bus_DB1 25
 #define input_data_bus_DB2 2
 #define input_data_bus_DB3 3
 #define input_data_bus_DB4 4
@@ -53,7 +53,7 @@
 // Pistons
 
 #define pistons_addr_data_bus_D0 38  //input addr_data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
-#define pistons_addr_data_bus_D1 39
+#define pistons_addr_data_bus_D1 39  //egymást követő pineknek kell lenniük, növekvő sorrendben
 #define pistons_addr_data_bus_D2 40
 #define pistons_addr_data_bus_D3 41
 #define pistons_addr_data_bus_D4 42
@@ -65,8 +65,7 @@
 
 // Volumes
 
-#define master_vol A0  //csak analóg pinekre mehetnek!
-#define reverb_vol A1
+#define reverb_vol A1 //csak analóg pinekre mehetnek!
 #define great_vol A2
 #define pedal_vol A3
 #define swell_vol A4  //ennél majd trükközni kell
@@ -78,10 +77,11 @@
 
 // Midi
 #define BaudRate 115200
-#define noteOn 143    //144 = Channel 1 Note on,  145 = Channel 2 Note on,  és akkor majd úgy használhatom, hogy noteOn + channel_number
+#define noteOn 143    //144 = Channel 1 Note on,  145 = Channel 2 Note on, és akkor majd úgy használhatom, hogy noteOn + channel_number
 #define noteOff 127   //128 = Channel 1 Note off, 129 = Channel 2 Note off, és akkor majd úgy használhatom, hogy noteOff + channel_number
 #define velocity 127  //a billentyű lenyomás erőssége (ez a maximum érték, és semmi jelentőssége, hogy mennyi, mert nem tudja kezelni az orgona)
 #define lowest_note 36
+#define controller 175  //hangerő szabályzókhoz, 176 = control change, és akkor majd úgy használhatom, hogy controller + channel_number
 
 //csatornák
 #define pedal_ch 1
@@ -89,19 +89,21 @@
 #define swell_ch 3
 #define stops_ch 4
 #define piston_ch 5
-#define master_vol_ch 6
-#define reverb_vol_ch 7
-#define great_vol_ch 8
-#define pedal_vol_ch 9
-#define swell_vol_ch 10
+
+#define pedal_vol_ch 1
+#define great_vol_ch 2
+#define swell_vol_ch 3
+#define reverb_vol_ch 4
 #define receive_ch 1
+
+#define analog_threshold 32
 
 
 
 // LEDs
-byte leds_state[30] = { 0 };  //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást  //EL VAN SZÁMOZVA ÉS TRÜKKOS A RAJZ!
-byte comb = 0;
-byte tutti = 0;
+byte leds_state[30];  //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást  //EL VAN SZÁMOZVA ÉS TRÜKKOS A RAJZ!
+byte preset = 1;
+byte tutti = 1;
 
 
 // stops
@@ -117,6 +119,22 @@ byte keys_last[2][61];
 // pedals
 byte peds_cur[30];
 byte peds_last[30];
+
+
+// pistons
+//0-5: preset
+//  6: set
+//  7: mix
+//  8: T
+byte pistons_cur[9];
+byte pistons_last[9];
+
+
+// analog
+int pedal_vol_last;
+int great_vol_last;
+int swell_vol_last;
+int reverb_vol_last;
 
 
 
@@ -225,7 +243,7 @@ void set_A(int n) {
 
 
 
-void read_bus(int bus_first_bit, byte* addr, int element, int n) {  //addr címen lévő tömb element-edik elemétől kezdve n (max 8) darab pin értékét írja be az input data bus-nak
+void read_bus(int bus_first_bit, byte addr[], int element, int n) {  //addr címen lévő tömb element-edik elemétől kezdve n (max 8) darab pin értékét írja be az input data bus-nak
   for (int i = 0; i < n && i < 8; i++) {
     addr[element + i] = digitalRead(bus_first_bit + i);
   }
@@ -275,8 +293,8 @@ void update_leds(void) {
     digitalWrite(stops_addr_bus_A1, 1);
   }
 
-  for (int i = 4; i >= 1; i--) {  //combs 1
-    digitalWrite(stops_addr_bus_DATA, comb == i);
+  for (int i = 4; i >= 1; i--) {  //presets 1
+    digitalWrite(stops_addr_bus_DATA, preset == i);
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
@@ -291,7 +309,7 @@ void update_leds(void) {
     digitalWrite(stops_addr_bus_A1, 1);
   }
 
-  digitalWrite(stops_addr_bus_DATA, comb == 5);  //combs 2
+  digitalWrite(stops_addr_bus_DATA, preset == 5);  //presets 2
   digitalWrite(stops_addr_bus_A1, 0);
   digitalWrite(stops_addr_bus_A1, 1);
 
@@ -322,6 +340,7 @@ void update_stops_cur(void) {
 
   digitalWrite(stops_addr_bus__E, 1);
 }
+
 
 
 void update_keys_cur(void) {
@@ -360,16 +379,40 @@ void update_peds_cur(void) {
 
 
 
+void update_pistons_cur(void) {
+  digitalWrite(pistons_addr_data_bus__S4_4, 0);
+  read_bus(pistons_addr_data_bus_D0, stops_cur, 1, 5);  //1-5
+  digitalWrite(pistons_addr_data_bus__S4_4, 1);
+
+  digitalWrite(pistons_addr_data_bus__S4_5, 0);
+  pistons_cur[0] = (digitalRead(pistons_addr_data_bus_D1) && digitalRead(pistons_addr_data_bus_D2));  //0 //az invertált logika miatt van &&
+  pistons_cur[6] = digitalRead(pistons_addr_data_bus_D0);                                             //set
+  pistons_cur[7] = digitalRead(pistons_addr_data_bus_D3);                                             //mix
+  pistons_cur[8] = digitalRead(pistons_addr_data_bus_D4);                                             //T
+  digitalWrite(pistons_addr_data_bus__S4_5, 1);
+}
+
+
+
 void compare_and_send(byte cur_array[], byte last_array[], int length, int channel, int shift) {
   for (int i = 0; i < length; i++) {
     if (cur_array[i] == 1 && last_array[i] == 0) {
-      MIDI_send(noteOn + channel, i + shift, velocity);
+      MIDI_send(noteOff + channel, i + shift, velocity);  //az invertált logika miatt noteOff kell, ha felfutó él volt
+      last_array[i] = cur_array[i];
+    } else if (cur_array[i] == 0 && last_array[i] == 1) {
+      MIDI_send(noteOn + channel, i + shift, velocity);  //és on, ha lefutó
       last_array[i] = cur_array[i];
     }
-    else if (cur_array[i] == 0 && last_array[i] == 1) {
-      MIDI_send(noteOff + channel, i + shift, velocity);
-      last_array[i] = cur_array[i];
-    }
+  }
+}
+
+
+
+void analog_update_and_send(int input, int *last, int channel) {
+  int cur = analogRead(input);
+  if (abs(cur - *last) >= analog_threshold) {
+    MIDI_send(controller + channel, channel, (byte)map(cur, 0, 1023, 0, 127));
+    *last = cur;
   }
 }
 
@@ -458,15 +501,18 @@ void setup() {
 void loop() {
   MIDI_read();
 
-  //uncomment to test hardware, comment to test midi
+  //uncomment to test with hardware, comment to test without
+  
   update_stops_cur();
   update_keys_cur();
   update_peds_cur();
+  update_pistons_cur();
 
 
-  //uncomment to test midi, comment to test hardware
+
+  //uncomment to test without hardware, comment to test with hardware
   /*
-  digitalWrite(8, leds_state[1]);
+  digitalWrite(8, leds_state[3]);
 
   peds_cur[0] = !peds_cur[0];
   keys_cur[0][1] = !keys_cur[0][1];
@@ -482,4 +528,11 @@ void loop() {
   compare_and_send(keys_cur[0], keys_last[0], 61, great_ch, lowest_note);
   compare_and_send(keys_cur[1], keys_last[1], 61, swell_ch, lowest_note);
   compare_and_send(stops_cur, stops_last, 30, stops_ch, 0);
+  compare_and_send(pistons_cur, pistons_last, 9, piston_ch, 0);
+
+  /*
+  analog_update_and_send(pedal_vol, &pedal_vol_last, pedal_vol_ch);
+  analog_update_and_send(great_vol, &great_vol_last, great_vol_ch);
+  analog_update_and_send(swell_vol, &swell_vol_last, swell_vol_ch);
+  analog_update_and_send(reverb_vol, &reverb_vol_last, reverb_vol_ch);*/
 }
