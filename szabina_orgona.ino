@@ -456,20 +456,12 @@ void setup() {
 
 
 void loop() {
-
+  MIDI_read();
 
   //uncomment to test hardware, comment to test midi
   update_stops_cur();
   update_keys_cur();
   update_peds_cur();
-  
-
-  MIDI_read();
-
-  compare_and_send(peds_cur, peds_last, 30, pedal_ch, lowest_note);
-  compare_and_send(keys_cur[0], keys_last[0], 61, great_ch, lowest_note);
-  compare_and_send(keys_cur[1], keys_last[1], 61, swell_ch, lowest_note);
-  compare_and_send(stops_cur, stops_last, 30, stops_ch, 0);
 
 
   //uncomment to test midi, comment to test hardware
@@ -482,4 +474,12 @@ void loop() {
   stops_cur[3] = !stops_cur[3];
 
   delay(1000);*/
+
+
+  //////////////////////////////////////////////////////////////////
+
+  compare_and_send(peds_cur, peds_last, 30, pedal_ch, lowest_note);
+  compare_and_send(keys_cur[0], keys_last[0], 61, great_ch, lowest_note);
+  compare_and_send(keys_cur[1], keys_last[1], 61, swell_ch, lowest_note);
+  compare_and_send(stops_cur, stops_last, 30, stops_ch, 0);
 }
