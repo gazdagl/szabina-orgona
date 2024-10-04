@@ -24,7 +24,7 @@
 
 // Pedals
 
-#define pedal_addr_data_bus_D0 12
+#define pedal_addr_data_bus_D0 12  //egymást követő pineknek kell lenniük, növekvő sorrendben
 #define pedal_addr_data_bus_D1 13
 #define pedal_addr_data_bus_D2 14
 #define pedal_addr_data_bus_D3 15
@@ -81,6 +81,8 @@
 #define noteOn 143    //144 = Channel 1 Note on,  145 = Channel 2 Note on,  és akkor majd úgy használhatom, hogy noteOn + channel_number
 #define noteOff 127   //128 = Channel 1 Note off, 129 = Channel 2 Note off, és akkor majd úgy használhatom, hogy noteOff + channel_number
 #define velocity 127  //a billentyű lenyomás erőssége (ez a maximum érték, és semmi jelentőssége, hogy mennyi, mert nem tudja kezelni az orgona)
+#define lowest_note 36
+
 //csatornák
 #define pedal_ch 1
 #define great_ch 2
@@ -92,6 +94,7 @@
 #define great_vol_ch 8
 #define pedal_vol_ch 9
 #define swell_vol_ch 10
+#define receive_ch 1
 
 
 
@@ -117,17 +120,34 @@ byte peds_last[30];
 
 
 
+void MIDI_send(byte status, byte data1, byte data2) {
+  Serial.write(status);
+  Serial.write(data1);
+  Serial.write(data2);
+}
+
+
+
+void MIDI_read() {
+  if (Serial.available() > 2) {   //3 bájt egy midi üzenet
+    byte status = Serial.read();  //pl: noteOn, noteOff
+    byte data1 = Serial.read();   //note
+    byte data2 = Serial.read();   //velocity (don't care jelenleg)
+
+    if (data1 < sizeof(leds_state) / sizeof(byte)) {  //csak akkor foglalkozom vele, ha be tudom írni a led_state tömbbe, vagyis az elem számnál kisebb
+      if (status == noteOn + receive_ch) {
+        leds_state[data1] = 1;
+      } else if (status == noteOff + receive_ch) {
+        leds_state[data1] = 0;
+      }
+    }
+  }
+}
+
+
+
 void set_A(int n) {
   switch (n) {
-    case 0:
-      digitalWrite(keyboard_addr_bus_A0, 0);
-      digitalWrite(keyboard_addr_bus_A1, 0);
-      digitalWrite(keyboard_addr_bus_A2, 0);
-
-      digitalWrite(stops_addr_bus_A0, 0);
-      digitalWrite(stops_addr_bus_A1, 0);
-      digitalWrite(stops_addr_bus_A2, 0);
-      break;
     case 1:
       digitalWrite(keyboard_addr_bus_A0, 1);
       digitalWrite(keyboard_addr_bus_A1, 0);
@@ -174,8 +194,8 @@ void set_A(int n) {
       digitalWrite(stops_addr_bus_A2, 1);
       break;
     case 6:
-      digitalWrite(keyboard_addr_bus_A0, 1);
-      digitalWrite(keyboard_addr_bus_A1, 0);
+      digitalWrite(keyboard_addr_bus_A0, 0);
+      digitalWrite(keyboard_addr_bus_A1, 1);
       digitalWrite(keyboard_addr_bus_A2, 1);
 
       digitalWrite(stops_addr_bus_A0, 1);
@@ -205,9 +225,9 @@ void set_A(int n) {
 
 
 
-void read_input_data_bus(byte* addr, int element, int n) {  //addr címen lévő tömb element-edik elemétől kezdve n (max 8) darab pin értékét írja be az input data bus-nak
+void read_bus(int bus_first_bit, byte* addr, int element, int n) {  //addr címen lévő tömb element-edik elemétől kezdve n (max 8) darab pin értékét írja be az input data bus-nak
   for (int i = 0; i < n && i < 8; i++) {
-    addr[element + i] = digitalRead(input_data_bus_DB0 + i);
+    addr[element + i] = digitalRead(bus_first_bit + i);
   }
 }
 
@@ -289,33 +309,35 @@ void update_leds(void) {
 }
 
 
+
 void update_stops_cur(void) {
   digitalWrite(stops_addr_bus__E, 0);
 
   for (int j = 0; j < 3; j++) {
     set_A(j);
-    read_input_data_bus(stops_cur, 8 * j, 8);
+    read_bus(input_data_bus_DB0, stops_cur, 8 * j, 8);
   }
   set_A(3);
-  read_input_data_bus(stops_cur, 8 * 3, 5);
+  read_bus(input_data_bus_DB0, stops_cur, 8 * 3, 5);
 
   digitalWrite(stops_addr_bus__E, 1);
 }
 
 
 void update_keys_cur(void) {
-  for (int i = 1; i <= 2; i++) {
-    if (i == 1)
+  for (int i = 0; i < 2; i++) {
+    if (i == 0)
       digitalWrite(keyboard_addr_bus__E_great, 0);
     else
       digitalWrite(keyboard_addr_bus__E_swell, 0);
 
     for (int j = 0; j < 7; j++) {
       set_A(j);
-      read_input_data_bus(keys_cur[i], 8 * j, 8);
+      read_bus(input_data_bus_DB0, keys_cur[i], 8 * j, 8);
     }
+
     set_A(7);
-    read_input_data_bus(keys_cur[i], 8 * 7, 5);
+    read_bus(input_data_bus_DB0, keys_cur[i], 8 * 7, 5);
 
     digitalWrite(keyboard_addr_bus__E_great, 1);
     digitalWrite(keyboard_addr_bus__E_swell, 1);
@@ -323,17 +345,34 @@ void update_keys_cur(void) {
 }
 
 
+
 void update_peds_cur(void) {
   for (int i = 0; i < 3; i++) {
     digitalWrite(pedal_addr_data_bus__S4_0 + i, 0);
-    read_input_data_bus(peds_cur, 8 * i, 8);
+    read_bus(pedal_addr_data_bus_D0, peds_cur, 8 * i, 8);
     digitalWrite(pedal_addr_data_bus__S4_0 + i, 1);
   }
 
   digitalWrite(pedal_addr_data_bus__S4_3, 0);
-  read_input_data_bus(peds_cur, 8 * 3, 6);
+  read_bus(pedal_addr_data_bus_D0, peds_cur, 8 * 3, 6);
   digitalWrite(pedal_addr_data_bus__S4_3, 1);
 }
+
+
+
+void compare_and_send(byte cur_array[], byte last_array[], int length, int channel, int shift) {
+  for (int i = 0; i < length; i++) {
+    if (cur_array[i] == 1 && last_array[i] == 0) {
+      MIDI_send(noteOn + channel, i + shift, velocity);
+      last_array[i] = cur_array[i];
+    }
+    else if (cur_array[i] == 0 && last_array[i] == 1) {
+      MIDI_send(noteOff + channel, i + shift, velocity);
+      last_array[i] = cur_array[i];
+    }
+  }
+}
+
 
 
 void pins_setup(void) {
@@ -393,6 +432,7 @@ void pins_setup(void) {
 }
 
 
+
 void setup() {
   pins_setup();
 
@@ -414,16 +454,32 @@ void setup() {
 }
 
 
+
 void loop() {
-  //MIDImessage(noteOn + pedal_ch, 63, velocity);  //példa küldés
+
+
+  //uncomment to test hardware, comment to test midi
   update_stops_cur();
   update_keys_cur();
   update_peds_cur();
-}
+  
+
+  MIDI_read();
+
+  compare_and_send(peds_cur, peds_last, 30, pedal_ch, lowest_note);
+  compare_and_send(keys_cur[0], keys_last[0], 61, great_ch, lowest_note);
+  compare_and_send(keys_cur[1], keys_last[1], 61, swell_ch, lowest_note);
+  compare_and_send(stops_cur, stops_last, 30, stops_ch, 0);
 
 
-void MIDImessage(byte status, byte data1, byte data2) {
-  Serial.write(status);
-  Serial.write(data1);
-  Serial.write(data2);
+  //uncomment to test midi, comment to test hardware
+  /*
+  digitalWrite(8, leds_state[1]);
+
+  peds_cur[0] = !peds_cur[0];
+  keys_cur[0][1] = !keys_cur[0][1];
+  keys_cur[1][2] = !keys_cur[1][2];
+  stops_cur[3] = !stops_cur[3];
+
+  delay(1000);*/
 }
