@@ -2,73 +2,78 @@
 // nevek a kapcs. rajz alapján
 // pin számokat majd átírjuk, ahogy sikerül bekötni
 
+//tesztelés utáni verzió
+//todo: led panel javítás, analóg bekötés, pedál hiba, esetleg bekötő panel
+
 
 // Keyboards
 
-#define input_data_bus_DB0 24  //egymást követő pineknek kell lenniük, növekvő sorrendben
-#define input_data_bus_DB1 25
-#define input_data_bus_DB2 2
-#define input_data_bus_DB3 3
-#define input_data_bus_DB4 4
-#define input_data_bus_DB5 5
-#define input_data_bus_DB6 6
-#define input_data_bus_DB7 7
+#define input_data_bus_DB0 A0  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define input_data_bus_DB1 A1
+#define input_data_bus_DB2 A2
+#define input_data_bus_DB3 A3
+#define input_data_bus_DB4 A4
+#define input_data_bus_DB5 A5
+#define input_data_bus_DB6 A6
+#define input_data_bus_DB7 A7
+#define input_data_bus_RST A8
 
-#define keyboard_addr_bus_A0 8
-#define keyboard_addr_bus_A1 9
-#define keyboard_addr_bus_A2 10
-#define keyboard_addr_bus__E_great 45  //negált jelet alulvonással kezdem (!E=_E)
-#define keyboard_addr_bus__E_swell 46
+
+#define keyboard_addr_bus_A0 18
+#define keyboard_addr_bus_A1 17
+#define keyboard_addr_bus_A2 16
+#define keyboard_addr_bus__E_swell 15  //negált jelet alulvonással kezdem (!E=_E)
+#define keyboard_addr_bus__E_great 14
 
 
 
 // Pedals
 
-#define pedal_addr_data_bus_D0 12  //egymást követő pineknek kell lenniük, növekvő sorrendben
-#define pedal_addr_data_bus_D1 13
-#define pedal_addr_data_bus_D2 14
-#define pedal_addr_data_bus_D3 15
-#define pedal_addr_data_bus_D4 16
-#define pedal_addr_data_bus_D5 17
-#define pedal_addr_data_bus_D6 18
-#define pedal_addr_data_bus_D7 19
+#define pedal_addr_data_bus_D0 22  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define pedal_addr_data_bus_D1 23
+#define pedal_addr_data_bus_D2 24
+#define pedal_addr_data_bus_D3 25
+#define pedal_addr_data_bus_D4 26
+#define pedal_addr_data_bus_D5 27
+#define pedal_addr_data_bus_D6 28
+#define pedal_addr_data_bus_D7 29
 
-#define pedal_addr_data_bus__S4_0 20  //egymást követő pineknek kell lenniük, növekvő sorrendben
-#define pedal_addr_data_bus__S4_1 21
-#define pedal_addr_data_bus__S4_2 22
-#define pedal_addr_data_bus__S4_3 23
+#define pedal_addr_data_bus__S4_0 30  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define pedal_addr_data_bus__S4_1 31
+#define pedal_addr_data_bus__S4_2 32
+#define pedal_addr_data_bus__S4_3 33
 
 
 
 // Stops                        (+transposer amit valszeg nem fogunk használni)
 
-#define stops_addr_bus_A0 33
-#define stops_addr_bus_A1 34
-#define stops_addr_bus_A2 35
-#define stops_addr_bus__E 36
-#define stops_addr_bus_DATA 37
+#define stops_addr_bus_A0 2
+#define stops_addr_bus_A1 3
+#define stops_addr_bus_A2 4
+#define stops_addr_bus__E 5
+#define stops_addr_bus_DATA 6
 
 
 
 // Pistons
 
-#define pistons_addr_data_bus_D0 38  //input addr_data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
-#define pistons_addr_data_bus_D1 39  //egymást követő pineknek kell lenniük, növekvő sorrendben
-#define pistons_addr_data_bus_D2 40
-#define pistons_addr_data_bus_D3 41
-#define pistons_addr_data_bus_D4 42
+#define pistons_addr_data_bus_D0 40  //input addr_data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
+#define pistons_addr_data_bus_D1 41  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define pistons_addr_data_bus_D2 42
+#define pistons_addr_data_bus_D3 43
+#define pistons_addr_data_bus_D4 44
 
-#define pistons_addr_data_bus__S4_4 43  //ez el van írva a kapcsolási rajzban (_S4_5-re)
-#define pistons_addr_data_bus__S4_5 44
+#define pistons_addr_data_bus__S4_4 45  //ez el van írva a kapcsolási rajzban (_S4_5-re)
+#define pistons_addr_data_bus__S4_5 46
 
 
 
 // Volumes
 
-#define reverb_vol A1 //csak analóg pinekre mehetnek!
-#define great_vol A2
-#define pedal_vol A3
-#define swell_vol A4  //ennél majd trükközni kell
+#define reverb_vol A11  //csak analóg pinekre mehetnek!
+#define great_vol A12
+#define pedal_vol A13
+#define swell_vol A14  //ennél majd trükközni kell
 
 
 //  #####################################################################
@@ -166,6 +171,15 @@ void MIDI_read() {
 
 void set_A(int n) {
   switch (n) {
+    case 0:
+      digitalWrite(keyboard_addr_bus_A0, 0);
+      digitalWrite(keyboard_addr_bus_A1, 0);
+      digitalWrite(keyboard_addr_bus_A2, 0);
+
+      digitalWrite(stops_addr_bus_A0, 0);
+      digitalWrite(stops_addr_bus_A1, 0);
+      digitalWrite(stops_addr_bus_A2, 0);
+      break;
     case 1:
       digitalWrite(keyboard_addr_bus_A0, 1);
       digitalWrite(keyboard_addr_bus_A1, 0);
@@ -216,8 +230,8 @@ void set_A(int n) {
       digitalWrite(keyboard_addr_bus_A1, 1);
       digitalWrite(keyboard_addr_bus_A2, 1);
 
-      digitalWrite(stops_addr_bus_A0, 1);
-      digitalWrite(stops_addr_bus_A1, 0);
+      digitalWrite(stops_addr_bus_A0, 0);
+      digitalWrite(stops_addr_bus_A1, 1);
       digitalWrite(stops_addr_bus_A2, 1);
       break;
     case 7:
@@ -252,6 +266,8 @@ void read_bus(int bus_first_bit, byte addr[], int element, int n) {  //addr cím
 
 
 void update_leds(void) {
+  digitalWrite(stops_addr_bus__E, 0);
+
   digitalWrite(stops_addr_bus_A0, 1);
   digitalWrite(stops_addr_bus_A1, 1);
   digitalWrite(stops_addr_bus_A2, 1);  //CP = 1 és ST = 0
@@ -324,6 +340,39 @@ void update_leds(void) {
   digitalWrite(stops_addr_bus_A0, 0);
   digitalWrite(stops_addr_bus_A0, 1);
   //végül ST = 0, CP = 1 állásban hagyom a shiftregisztereket, a dekóder kiválasztó lábait pedig 111 állásban
+
+  digitalWrite(stops_addr_bus__E, 1);
+}
+
+
+
+void update_leds2(void) {
+
+
+  set_A(7);  //CP = 1 és ST = 0
+
+  digitalWrite(stops_addr_bus__E, 0);
+
+  for (int i = 0; i < 10; i++) {
+    digitalWrite(stops_addr_bus_DATA, 1);
+    set_A(5);
+    //set_A(7);
+    //delay(200);
+    set_A(6);
+    //delay(200);
+    set_A(7);
+    delay(200);
+    digitalWrite(stops_addr_bus_DATA, 0);
+    set_A(5);
+    //set_A(7);
+    //delay(200);
+    set_A(6);
+    //delay(200);
+    set_A(7);
+    delay(200);
+  }
+
+  digitalWrite(stops_addr_bus__E, 1);
 }
 
 
@@ -373,7 +422,10 @@ void update_peds_cur(void) {
   }
 
   digitalWrite(pedal_addr_data_bus__S4_3, 0);
-  read_bus(pedal_addr_data_bus_D0, peds_cur, 8 * 3, 6);
+  //for(int i=0;i<6;i++)
+  //peds_cur[8*3+i] = 1;
+  //peds_cur[8*3] = digitalRead(pedal_addr_data_bus_D0);
+  read_bus(pedal_addr_data_bus_D1, peds_cur, 8 * 3, 6);
   digitalWrite(pedal_addr_data_bus__S4_3, 1);
 }
 
@@ -381,7 +433,12 @@ void update_peds_cur(void) {
 
 void update_pistons_cur(void) {
   digitalWrite(pistons_addr_data_bus__S4_4, 0);
-  read_bus(pistons_addr_data_bus_D0, stops_cur, 1, 5);  //1-5
+  //read_bus(pistons_addr_data_bus_D0, pistons_cur, 1, 5);  //1-5
+  pistons_cur[1] = digitalRead(pistons_addr_data_bus_D0);
+  pistons_cur[2] = digitalRead(pistons_addr_data_bus_D1);
+  pistons_cur[3] = digitalRead(pistons_addr_data_bus_D2);
+  pistons_cur[4] = digitalRead(pistons_addr_data_bus_D3);
+  pistons_cur[5] = digitalRead(pistons_addr_data_bus_D4);
   digitalWrite(pistons_addr_data_bus__S4_4, 1);
 
   digitalWrite(pistons_addr_data_bus__S4_5, 0);
@@ -427,6 +484,7 @@ void pins_setup(void) {
   pinMode(input_data_bus_DB5, INPUT_PULLUP);
   pinMode(input_data_bus_DB6, INPUT_PULLUP);
   pinMode(input_data_bus_DB7, INPUT_PULLUP);
+  pinMode(input_data_bus_RST, OUTPUT);
 
   pinMode(keyboard_addr_bus_A0, OUTPUT);
   pinMode(keyboard_addr_bus_A1, OUTPUT);
@@ -467,7 +525,6 @@ void pins_setup(void) {
   pinMode(pistons_addr_data_bus__S4_5, OUTPUT);
 
 
-  pinMode(master_vol, INPUT);
   pinMode(reverb_vol, INPUT);
   pinMode(great_vol, INPUT);
   pinMode(pedal_vol, INPUT);
@@ -492,6 +549,7 @@ void setup() {
 
   digitalWrite(pistons_addr_data_bus__S4_4, 1);
   digitalWrite(pistons_addr_data_bus__S4_5, 1);
+  digitalWrite(input_data_bus_RST, 1);
 
   Serial.begin(BaudRate);
 }
@@ -502,11 +560,16 @@ void loop() {
   MIDI_read();
 
   //uncomment to test with hardware, comment to test without
-  
+
   update_stops_cur();
   update_keys_cur();
   update_peds_cur();
   update_pistons_cur();
+  update_leds2(); //led villogtatás
+  //digitalWrite(stops_addr_bus__E, 0);
+  //set_A(6);
+
+
 
 
 
@@ -527,7 +590,7 @@ void loop() {
   compare_and_send(peds_cur, peds_last, 30, pedal_ch, lowest_note);
   compare_and_send(keys_cur[0], keys_last[0], 61, great_ch, lowest_note);
   compare_and_send(keys_cur[1], keys_last[1], 61, swell_ch, lowest_note);
-  compare_and_send(stops_cur, stops_last, 30, stops_ch, 0);
+  compare_and_send(stops_cur, stops_last, 30, stops_ch, 1);
   compare_and_send(pistons_cur, pistons_last, 9, piston_ch, 0);
 
   /*
