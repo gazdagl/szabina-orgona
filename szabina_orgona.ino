@@ -265,6 +265,22 @@ void read_bus(int bus_first_bit, byte addr[], int element, int n) {  //addr cím
 
 
 
+void set_leds(bool state) {
+  set_A(7);
+  digitalWrite(stops_addr_bus__E, 0);
+  digitalWrite(stops_addr_bus_DATA, state);
+
+  for (int i = 0; i < 36; i++) {
+    set_A(5); //clock
+    set_A(7);
+  }
+  set_A(6);   //strobe
+  set_A(7);
+  digitalWrite(stops_addr_bus__E, 0);
+}
+
+
+
 void update_leds(void) {
   digitalWrite(stops_addr_bus__E, 0);
 
@@ -347,10 +363,35 @@ void update_leds(void) {
 
 
 void update_leds2(void) {
-
-
   set_A(7);  //CP = 1 és ST = 0
+  digitalWrite(stops_addr_bus__E, 0);
 
+  for (int i = 0; i < 10; i++) {
+    digitalWrite(stops_addr_bus_DATA, 1);
+    set_A(5);
+    //set_A(7);
+    //delay(200);
+    set_A(6);
+    //delay(200);
+    set_A(7);
+    delay(200);
+    digitalWrite(stops_addr_bus_DATA, 0);
+    set_A(5);
+    //set_A(7);
+    //delay(200);
+    set_A(6);
+    //delay(200);
+    set_A(7);
+    delay(200);
+  }
+
+  digitalWrite(stops_addr_bus__E, 1);
+}
+
+
+
+void update_leds3(void) {
+  set_A(7);  //CP = 1 és ST = 0
   digitalWrite(stops_addr_bus__E, 0);
 
   for (int i = 0; i < 10; i++) {
@@ -549,6 +590,8 @@ void setup() {
 
   digitalWrite(pistons_addr_data_bus__S4_4, 1);
   digitalWrite(pistons_addr_data_bus__S4_5, 1);
+  digitalWrite(input_data_bus_RST, 0);
+  set_leds(1);
   digitalWrite(input_data_bus_RST, 1);
 
   Serial.begin(BaudRate);
@@ -557,19 +600,20 @@ void setup() {
 
 
 void loop() {
-  MIDI_read();
+  //MIDI_read();
 
   //uncomment to test with hardware, comment to test without
 
-  update_stops_cur();
-  update_keys_cur();
-  update_peds_cur();
-  update_pistons_cur();
-  update_leds2(); //led villogtatás
-  //digitalWrite(stops_addr_bus__E, 0);
-  //set_A(6);
+  //update_stops_cur();
+  //update_keys_cur();
+  //update_peds_cur();
+  //update_pistons_cur();
+  //update_leds3();  //led villogtatás
 
-
+  set_leds(0);
+  delay(500);
+  set_leds(1);
+  delay(500);
 
 
 
