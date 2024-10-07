@@ -163,6 +163,7 @@ void MIDI_read() {
       } else if (status == noteOff + receive_ch) {
         leds_state[data1] = 0;
       }
+      update_leds();
     }
   }
 }
@@ -270,7 +271,7 @@ void set_leds(bool state) {
   digitalWrite(stops_addr_bus__E, 0);
   digitalWrite(stops_addr_bus_DATA, state);
 
-  for (int i = 0; i < 36; i++) {
+  for (int i = 0; i < 40; i++) {
     set_A(5); //clock
     set_A(7);
   }
@@ -282,11 +283,11 @@ void set_leds(bool state) {
 
 
 void update_leds(void) {
-  digitalWrite(stops_addr_bus__E, 0);
-
   digitalWrite(stops_addr_bus_A0, 1);
   digitalWrite(stops_addr_bus_A1, 1);
   digitalWrite(stops_addr_bus_A2, 1);  //CP = 1 és ST = 0
+
+  digitalWrite(stops_addr_bus__E, 0);
 
   //értékek beléptetése a shiftregiszterekbe
   digitalWrite(stops_addr_bus_DATA, 0);
