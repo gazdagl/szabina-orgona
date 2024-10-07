@@ -1,3 +1,40 @@
+// Midi
+#define BaudRate 115200
+#define noteOn 143    //144 = Channel 1 Note on,  145 = Channel 2 Note on, és akkor majd úgy használhatom, hogy noteOn + channel_number
+#define noteOff 127   //128 = Channel 1 Note off, 129 = Channel 2 Note off, és akkor majd úgy használhatom, hogy noteOff + channel_number
+#define velocity 127  //a billentyű lenyomás erőssége (ez a maximum érték, és semmi jelentőssége, hogy mennyi, mert nem tudja kezelni az orgona)
+#define lowest_note 36
+#define controller 175  //hangerő szabályzókhoz, 176 = control change, és akkor majd úgy használhatom, hogy controller + channel_number
+
+//csatornák
+#define pedal_ch 1
+#define great_ch 2
+#define swell_ch 3
+#define stops_ch 4
+#define piston_ch 5
+
+#define pedal_vol_ch 1
+#define great_vol_ch 2
+#define swell_vol_ch 3
+#define reverb_vol_ch 4
+
+#define register_ch 1
+#define preset_ch 2
+
+#define analog_threshold 32
+
+/*
+  Grand Orgue:
+    billentyűk: note
+    regiszterek: noteOn, midi note a regiszter száma
+    presetek: noteOn, midi note a preset száma, 6 a tutti
+    ledek: note, midi note a regiszter/preset száma száma
+
+    a ki érték legyen 0, a be érték mindegy csak ne 0
+*/
+
+
+
 // Port defines  #########################################################
 // nevek a kapcs. rajz alapján
 // pin számokat majd átírjuk, ahogy sikerül bekötni
@@ -76,33 +113,6 @@
 #define swell_vol A14  //ennél majd trükközni kell
 
 
-//  #####################################################################
-
-
-
-// Midi
-#define BaudRate 115200
-#define noteOn 143    //144 = Channel 1 Note on,  145 = Channel 2 Note on, és akkor majd úgy használhatom, hogy noteOn + channel_number
-#define noteOff 127   //128 = Channel 1 Note off, 129 = Channel 2 Note off, és akkor majd úgy használhatom, hogy noteOff + channel_number
-#define velocity 127  //a billentyű lenyomás erőssége (ez a maximum érték, és semmi jelentőssége, hogy mennyi, mert nem tudja kezelni az orgona)
-#define lowest_note 36
-#define controller 175  //hangerő szabályzókhoz, 176 = control change, és akkor majd úgy használhatom, hogy controller + channel_number
-
-//csatornák
-#define pedal_ch 1
-#define great_ch 2
-#define swell_ch 3
-#define stops_ch 4
-#define piston_ch 5
-
-#define pedal_vol_ch 1
-#define great_vol_ch 2
-#define swell_vol_ch 3
-#define reverb_vol_ch 4
-#define register_ch 1
-#define preset_ch 2
-
-#define analog_threshold 32
 
 
 
@@ -539,15 +549,15 @@ void setup() {
   set_leds(0);
   digitalWrite(input_data_bus_RST, 1);
 
-/*
+  /*
   for (int i = 0; i < sizeof(registers) / sizeof(byte); i++) {
     registers[i] = 0;
   }
 
   for (int i = 0; i < sizeof(presets) / sizeof(byte); i++) {
     presets[i] = 0;
-  }
-*/
+  }*/
+
 
   Serial.begin(BaudRate);
 }
