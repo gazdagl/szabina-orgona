@@ -99,16 +99,16 @@
 #define great_vol_ch 2
 #define swell_vol_ch 3
 #define reverb_vol_ch 4
-#define receive_ch 1
+#define register_ch 1
+#define preset_ch 2
 
 #define analog_threshold 32
 
 
 
 // LEDs
-byte leds_state[30];  //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást  //EL VAN SZÁMOZVA ÉS TRÜKKOS A RAJZ!
-byte preset = 1;
-byte tutti = 1;
+byte registers[30];  //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást  //EL VAN SZÁMOZVA ÉS TRÜKKOS A RAJZ!
+byte presets[7];     //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást, a 6os preset a tutti
 
 
 // stops
@@ -157,12 +157,17 @@ void MIDI_read() {
     byte data1 = Serial.read();   //note
     byte data2 = Serial.read();   //velocity (don't care jelenleg)
 
-    if (data1 < sizeof(leds_state) / sizeof(byte)) {  //csak akkor foglalkozom vele, ha be tudom írni a led_state tömbbe, vagyis az elem számnál kisebb
-      if (status == noteOn + receive_ch) {
-        leds_state[data1] = 1;
-      } else if (status == noteOff + receive_ch) {
-        leds_state[data1] = 0;
+    if (data1 < sizeof(registers) / sizeof(byte)) {  //csak akkor foglalkozom vele, ha be tudom írni a registers tömbbe, vagyis az elem számnál kisebb
+      if (status == noteOn + register_ch) {
+        registers[data1] = 1;
+      } else if (status == noteOff + register_ch) {
+        registers[data1] = 0;
+      } else if (status == noteOn + preset_ch) {
+        presets[data1] = 1;
+      } else if (status == noteOff + preset_ch) {
+        presets[data1] = 0;
       }
+      update_leds();
     }
   }
 }
@@ -265,28 +270,41 @@ void read_bus(int bus_first_bit, byte addr[], int element, int n) {  //addr cím
 
 
 
-void update_leds(void) {
+void set_leds(bool state) {
+  set_A(7);
   digitalWrite(stops_addr_bus__E, 0);
+  digitalWrite(stops_addr_bus_DATA, !state);
 
-  digitalWrite(stops_addr_bus_A0, 1);
-  digitalWrite(stops_addr_bus_A1, 1);
-  digitalWrite(stops_addr_bus_A2, 1);  //CP = 1 és ST = 0
+  for (int i = 0; i < 40; i++) {
+    set_A(5);  //clock
+    set_A(7);
+  }
+  set_A(6);  //strobe
+  set_A(7);
+  digitalWrite(stops_addr_bus__E, 1);
+}
+
+
+
+void update_leds(void) {
+  set_A(7);  //CP = 1 és ST = 0
+  digitalWrite(stops_addr_bus__E, 0);
 
   //értékek beléptetése a shiftregiszterekbe
   digitalWrite(stops_addr_bus_DATA, 0);
   digitalWrite(stops_addr_bus_A1, 0);
   digitalWrite(stops_addr_bus_A1, 1);  //1 óra ciklus a shiftregiszternek, mert az utolsó lábra nincs kötve semmi
 
-  digitalWrite(stops_addr_bus_DATA, tutti == 1);  //majd sorban a jelek visszafelé, óra ciklusokkal elválasztva
+  digitalWrite(stops_addr_bus_DATA, presets[6] == 0);  //majd sorban a jelek visszafelé, óra ciklusokkal elválasztva
   digitalWrite(stops_addr_bus_A1, 0);
   digitalWrite(stops_addr_bus_A1, 1);
 
-  digitalWrite(stops_addr_bus_DATA, leds_state[15] == 1);  //mix
+  digitalWrite(stops_addr_bus_DATA, registers[15] == 0);  //mix
   digitalWrite(stops_addr_bus_A1, 0);
   digitalWrite(stops_addr_bus_A1, 1);
 
   for (int i = 29; i >= 19; i--) {  //swell registers
-    digitalWrite(stops_addr_bus_DATA, leds_state[i] == 1);
+    digitalWrite(stops_addr_bus_DATA, registers[i] == 0);
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
@@ -298,19 +316,19 @@ void update_leds(void) {
   }
 
   for (int i = 12; i >= 9; i--) {  //great registers 1
-    digitalWrite(stops_addr_bus_DATA, leds_state[i] == 1);
+    digitalWrite(stops_addr_bus_DATA, registers[i] == 0);
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
 
   for (int i = 16; i >= 13; i--) {  //great registers 2
-    digitalWrite(stops_addr_bus_DATA, leds_state[i] == 1);
+    digitalWrite(stops_addr_bus_DATA, registers[i] == 0);
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
 
   for (int i = 4; i >= 1; i--) {  //presets 1
-    digitalWrite(stops_addr_bus_DATA, preset == i);
+    digitalWrite(stops_addr_bus_DATA, presets[i] == 0);
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
@@ -320,18 +338,18 @@ void update_leds(void) {
   digitalWrite(stops_addr_bus_A1, 1);  //1 óra ciklus a shiftregiszternek, mert az utolsó lábra nincs kötve semmi
 
   for (int i = 18; i >= 17; i--) {  //great registers 3
-    digitalWrite(stops_addr_bus_DATA, leds_state[i] == 1);
+    digitalWrite(stops_addr_bus_DATA, registers[i] == 0);
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
 
-  digitalWrite(stops_addr_bus_DATA, preset == 5);  //presets 2
+  digitalWrite(stops_addr_bus_DATA, presets[5] == 0);  //presets 2
   digitalWrite(stops_addr_bus_A1, 0);
   digitalWrite(stops_addr_bus_A1, 1);
 
 
   for (int i = 8; i >= 1; i--) {  //pedal registers
-    digitalWrite(stops_addr_bus_DATA, leds_state[i] == 1);
+    digitalWrite(stops_addr_bus_DATA, registers[i] == 0);
     digitalWrite(stops_addr_bus_A1, 0);
     digitalWrite(stops_addr_bus_A1, 1);
   }
@@ -340,38 +358,6 @@ void update_leds(void) {
   digitalWrite(stops_addr_bus_A0, 0);
   digitalWrite(stops_addr_bus_A0, 1);
   //végül ST = 0, CP = 1 állásban hagyom a shiftregisztereket, a dekóder kiválasztó lábait pedig 111 állásban
-
-  digitalWrite(stops_addr_bus__E, 1);
-}
-
-
-
-void update_leds2(void) {
-
-
-  set_A(7);  //CP = 1 és ST = 0
-
-  digitalWrite(stops_addr_bus__E, 0);
-
-  for (int i = 0; i < 10; i++) {
-    digitalWrite(stops_addr_bus_DATA, 1);
-    set_A(5);
-    //set_A(7);
-    //delay(200);
-    set_A(6);
-    //delay(200);
-    set_A(7);
-    delay(200);
-    digitalWrite(stops_addr_bus_DATA, 0);
-    set_A(5);
-    //set_A(7);
-    //delay(200);
-    set_A(6);
-    //delay(200);
-    set_A(7);
-    delay(200);
-  }
-
   digitalWrite(stops_addr_bus__E, 1);
 }
 
@@ -549,7 +535,19 @@ void setup() {
 
   digitalWrite(pistons_addr_data_bus__S4_4, 1);
   digitalWrite(pistons_addr_data_bus__S4_5, 1);
+  digitalWrite(input_data_bus_RST, 0);
+  set_leds(0);
   digitalWrite(input_data_bus_RST, 1);
+
+/*
+  for (int i = 0; i < sizeof(registers) / sizeof(byte); i++) {
+    registers[i] = 0;
+  }
+
+  for (int i = 0; i < sizeof(presets) / sizeof(byte); i++) {
+    presets[i] = 0;
+  }
+*/
 
   Serial.begin(BaudRate);
 }
@@ -565,17 +563,11 @@ void loop() {
   update_keys_cur();
   update_peds_cur();
   update_pistons_cur();
-  update_leds2(); //led villogtatás
-  //digitalWrite(stops_addr_bus__E, 0);
-  //set_A(6);
-
-
-
 
 
   //uncomment to test without hardware, comment to test with hardware
   /*
-  digitalWrite(8, leds_state[3]);
+  digitalWrite(8, registers[3]);
 
   peds_cur[0] = !peds_cur[0];
   keys_cur[0][1] = !keys_cur[0][1];
