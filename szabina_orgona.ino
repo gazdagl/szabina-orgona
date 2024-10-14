@@ -44,72 +44,72 @@
 
   // Keyboards
 
-    #define input_data_bus_DB0 A0  //egymást követő pineknek kell lenniük, növekvő sorrendben
-    #define input_data_bus_DB1 A1
-    #define input_data_bus_DB2 A2
-    #define input_data_bus_DB3 A3
-    #define input_data_bus_DB4 A4
-    #define input_data_bus_DB5 A5
-    #define input_data_bus_DB6 A6
-    #define input_data_bus_DB7 A7
-    #define input_data_bus_RST A8
+    #define input_data_bus_DB0 22  //egymást követő pineknek kell lenniük, növekvő sorrendben
+    #define input_data_bus_DB1 23
+    #define input_data_bus_DB2 24
+    #define input_data_bus_DB3 25
+    #define input_data_bus_DB4 26
+    #define input_data_bus_DB5 27
+    #define input_data_bus_DB6 28
+    #define input_data_bus_DB7 29
+    #define input_data_bus_RST 38
 
 
-    #define keyboard_addr_bus_A0 18
-    #define keyboard_addr_bus_A1 17
-    #define keyboard_addr_bus_A2 16
-    #define keyboard_addr_bus__E_swell 15  //negált jelet alulvonással kezdem (!E=_E)
-    #define keyboard_addr_bus__E_great 14
+    #define keyboard_addr_bus_A0 46
+    #define keyboard_addr_bus_A1 47
+    #define keyboard_addr_bus_A2 48
+    #define keyboard_addr_bus__E_swell 49  //negált jelet alulvonással kezdem (!E=_E)
+    #define keyboard_addr_bus__E_great 50
 
 
 
   // Pedals
 
-    #define pedal_addr_data_bus_D0 22  //egymást követő pineknek kell lenniük, növekvő sorrendben
-    #define pedal_addr_data_bus_D1 23
-    #define pedal_addr_data_bus_D2 24
-    #define pedal_addr_data_bus_D3 25
-    #define pedal_addr_data_bus_D4 26
-    #define pedal_addr_data_bus_D5 27
-    #define pedal_addr_data_bus_D6 28
-    #define pedal_addr_data_bus_D7 29
+    #define pedal_addr_data_bus_D0 30  //egymást követő pineknek kell lenniük, növekvő sorrendben
+    #define pedal_addr_data_bus_D1 31
+    #define pedal_addr_data_bus_D2 32
+    #define pedal_addr_data_bus_D3 33
+    #define pedal_addr_data_bus_D4 34
+    #define pedal_addr_data_bus_D5 35
+    #define pedal_addr_data_bus_D6 36
+    #define pedal_addr_data_bus_D7 37
 
-    #define pedal_addr_data_bus__S4_0 30  //egymást követő pineknek kell lenniük, növekvő sorrendben
-    #define pedal_addr_data_bus__S4_1 31
-    #define pedal_addr_data_bus__S4_2 32
-    #define pedal_addr_data_bus__S4_3 33
+    #define pedal_addr_data_bus__S4_0 40  //egymást követő pineknek kell lenniük, növekvő sorrendben
+    #define pedal_addr_data_bus__S4_1 41
+    #define pedal_addr_data_bus__S4_2 42
+    #define pedal_addr_data_bus__S4_3 43
 
 
 
   // Stops                        (+transposer amit valszeg nem fogunk használni)
 
-    #define stops_addr_bus_A0 2
-    #define stops_addr_bus_A1 3
-    #define stops_addr_bus_A2 4
-    #define stops_addr_bus__E 5
-    #define stops_addr_bus_DATA 6
+    #define stops_addr_bus_A0 A11
+    #define stops_addr_bus_A1 A12
+    #define stops_addr_bus_A2 A13
+    #define stops_addr_bus__E A14
+    #define stops_addr_bus_DATA A15
 
 
 
   // Pistons
 
-    #define pistons_addr_data_bus_D0 40  //input addr_data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
-    #define pistons_addr_data_bus_D1 41  //egymást követő pineknek kell lenniük, növekvő sorrendben
-    #define pistons_addr_data_bus_D2 42
-    #define pistons_addr_data_bus_D3 43
-    #define pistons_addr_data_bus_D4 44
+    #define pistons_addr_data_bus_D0 2  //input addr_data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
+    #define pistons_addr_data_bus_D1 3  //egymást követő pineknek kell lenniük, növekvő sorrendben
+    #define pistons_addr_data_bus_D2 4
+    #define pistons_addr_data_bus_D3 5
+    #define pistons_addr_data_bus_D4 6
 
-    #define pistons_addr_data_bus__S4_4 45  //ez el van írva a kapcsolási rajzban (_S4_5-re)
-    #define pistons_addr_data_bus__S4_5 46
+    #define pistons_addr_data_bus__S4_4 44  //ez el van írva a kapcsolási rajzban (_S4_5-re)
+    #define pistons_addr_data_bus__S4_5 45
 
 
 
   // Volumes
 
-    #define reverb_vol A11  //csak analóg pinekre mehetnek!
-    #define great_vol A12
-    #define pedal_vol A13
-    #define swell_vol A14  //ennél majd trükközni kell
+    #define reverb_vol A1  //csak analóg pinekre mehetnek!
+    #define great_vol A2
+    #define pedal_vol A3
+    #define swell_vol A4  //ennél majd trükközni kell
 
 
 
