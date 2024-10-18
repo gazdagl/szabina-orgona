@@ -479,11 +479,11 @@ void update_transposer(void) {
     if (!digitalRead(input_data_bus_DB0 + i)) {
       if (i > transposer_last) {
         MIDI_send(noteOn + transposer_ch, 0, velocity);  // transpose-
-        transposer_last = i;
+        transposer_last++;
         break;
       } else if (i < transposer_last) {
         MIDI_send(noteOn + transposer_ch, 1, velocity);  // transpose+
-        transposer_last = i;
+        transposer_last--;
         break;
       }
     }
