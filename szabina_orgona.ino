@@ -578,9 +578,9 @@ void loop() {
   compare_and_send(stops_cur, stops_last, 30, stops_ch, 1);
   compare_and_send(pistons_cur, pistons_last, 9, piston_ch, 0);
 
-  /*
+  
   analog_update_and_send(pedal_vol, &pedal_vol_last, pedal_vol_ch);
-  analog_update_and_send(great_vol, &great_vol_last, great_vol_ch);
+  analog_update_and_send(great_vol, &great_vol_last, great_vol_ch);/*
   analog_update_and_send(swell_vol, &swell_vol_last, swell_vol_ch);
   analog_update_and_send(reverb_vol, &reverb_vol_last, reverb_vol_ch);*/
 }
