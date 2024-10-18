@@ -1,29 +1,30 @@
 //led panel javítás utáni verzió
-//todo: analóg bekötés, pedál hiba, esetleg bekötő panel
+//todo: analóg bekötés, pedál hiba
 
 // Midi
-  #define BaudRate 115200
-  #define noteOn 143    //144 = Channel 1 Note on,  145 = Channel 2 Note on, és akkor majd úgy használhatom, hogy noteOn + channel_number
-  #define noteOff 127   //128 = Channel 1 Note off, 129 = Channel 2 Note off, és akkor majd úgy használhatom, hogy noteOff + channel_number
-  #define velocity 127  //a billentyű lenyomás erőssége (ez a maximum érték, és semmi jelentőssége, hogy mennyi, mert nem tudja kezelni az orgona)
-  #define lowest_note 36
-  #define controller 175  //hangerő szabályzókhoz, 176 = control change, és akkor majd úgy használhatom, hogy controller + channel_number
-  #define analog_threshold 32
+#define BaudRate 115200
+#define noteOn 143    //144 = Channel 1 Note on,  145 = Channel 2 Note on, és akkor majd úgy használhatom, hogy noteOn + channel_number
+#define noteOff 127   //128 = Channel 1 Note off, 129 = Channel 2 Note off, és akkor majd úgy használhatom, hogy noteOff + channel_number
+#define velocity 127  //a billentyű lenyomás erőssége (ez a maximum érték, és semmi jelentőssége, hogy mennyi, mert nem tudja kezelni az orgona)
+#define lowest_note 36
+#define controller 175  //hangerő szabályzókhoz, 176 = control change, és akkor majd úgy használhatom, hogy controller + channel_number
+#define analog_threshold 32
 
 //csatornák
-  #define pedal_ch 1
-  #define great_ch 2
-  #define swell_ch 3
-  #define stops_ch 4
-  #define piston_ch 5
+#define pedal_ch 1
+#define great_ch 2
+#define swell_ch 3
+#define stops_ch 4
+#define piston_ch 5
+#define transposer_ch 6 //0=-, 1=+
 
-  #define pedal_vol_ch 1
-  #define great_vol_ch 2
-  #define swell_vol_ch 3
-  #define reverb_vol_ch 4
+#define pedal_vol_ch 1
+#define great_vol_ch 2
+#define swell_vol_ch 3
+#define reverb_vol_ch 4
 
-  #define register_ch 1
-  #define preset_ch 2
+#define register_ch 1
+#define preset_ch 2
 
 
 /*Grand Orgue:
@@ -32,125 +33,124 @@
     presetek: noteOn, midi note a preset száma, 6 a tutti
     ledek: note, midi note a regiszter/preset száma száma
 
-    a ki érték legyen 0, a be érték mindegy csak ne 0
-*/
+    a ki érték legyen 0, a be érték mindegy csak ne 0*/
 
 
 
-// Port defines  #########################################################
-  // nevek a kapcs. rajz alapján
-  // pin számokat majd átírjuk, ahogy sikerül bekötni
+// Port defines
+// nevek a kapcs. rajz alapján
+// pin számokat majd átírjuk, ahogy sikerül bekötni
 
 
-  // Keyboards
+// Keyboards
 
-    #define input_data_bus_DB0 22  //egymást követő pineknek kell lenniük, növekvő sorrendben
-    #define input_data_bus_DB1 23
-    #define input_data_bus_DB2 24
-    #define input_data_bus_DB3 25
-    #define input_data_bus_DB4 26
-    #define input_data_bus_DB5 27
-    #define input_data_bus_DB6 28
-    #define input_data_bus_DB7 29
-    #define input_data_bus_RST 38
-
-
-    #define keyboard_addr_bus_A0 46
-    #define keyboard_addr_bus_A1 47
-    #define keyboard_addr_bus_A2 48
-    #define keyboard_addr_bus__E_swell 49  //negált jelet alulvonással kezdem (!E=_E)
-    #define keyboard_addr_bus__E_great 50
+#define input_data_bus_DB0 22  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define input_data_bus_DB1 23
+#define input_data_bus_DB2 24
+#define input_data_bus_DB3 25
+#define input_data_bus_DB4 26
+#define input_data_bus_DB5 27
+#define input_data_bus_DB6 28
+#define input_data_bus_DB7 29
+#define input_data_bus_RST 38
 
 
-
-  // Pedals
-
-    #define pedal_addr_data_bus_D0 30  //egymást követő pineknek kell lenniük, növekvő sorrendben
-    #define pedal_addr_data_bus_D1 31
-    #define pedal_addr_data_bus_D2 32
-    #define pedal_addr_data_bus_D3 33
-    #define pedal_addr_data_bus_D4 34
-    #define pedal_addr_data_bus_D5 35
-    #define pedal_addr_data_bus_D6 36
-    #define pedal_addr_data_bus_D7 37
-
-    #define pedal_addr_data_bus__S4_0 40  //egymást követő pineknek kell lenniük, növekvő sorrendben
-    #define pedal_addr_data_bus__S4_1 41
-    #define pedal_addr_data_bus__S4_2 42
-    #define pedal_addr_data_bus__S4_3 43
+#define keyboard_addr_bus_A0 46
+#define keyboard_addr_bus_A1 47
+#define keyboard_addr_bus_A2 48
+#define keyboard_addr_bus__E_swell 49  //negált jelet alulvonással kezdem (!E=_E)
+#define keyboard_addr_bus__E_great 50
 
 
 
-  // Stops                        (+transposer amit valszeg nem fogunk használni)
+// Pedals
 
-    #define stops_addr_bus_A0 A11
-    #define stops_addr_bus_A1 A12
-    #define stops_addr_bus_A2 A13
-    #define stops_addr_bus__E A14
-    #define stops_addr_bus_DATA A15
+#define pedal_addr_data_bus_D0 30  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define pedal_addr_data_bus_D1 31
+#define pedal_addr_data_bus_D2 32
+#define pedal_addr_data_bus_D3 33
+#define pedal_addr_data_bus_D4 34
+#define pedal_addr_data_bus_D5 35
+#define pedal_addr_data_bus_D6 36
+#define pedal_addr_data_bus_D7 37
 
-
-
-  // Pistons
-
-    #define pistons_addr_data_bus_D0 2  //input addr_data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
-    #define pistons_addr_data_bus_D1 3  //egymást követő pineknek kell lenniük, növekvő sorrendben
-    #define pistons_addr_data_bus_D2 4
-    #define pistons_addr_data_bus_D3 5
-    #define pistons_addr_data_bus_D4 6
-
-    #define pistons_addr_data_bus__S4_4 44  //ez el van írva a kapcsolási rajzban (_S4_5-re)
-    #define pistons_addr_data_bus__S4_5 45
+#define pedal_addr_data_bus__S4_0 40  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define pedal_addr_data_bus__S4_1 41
+#define pedal_addr_data_bus__S4_2 42
+#define pedal_addr_data_bus__S4_3 43
 
 
 
-  // Volumes
+// Stops                        (+transposer amit valszeg nem fogunk használni)
 
-    #define reverb_vol A1  //csak analóg pinekre mehetnek!
-    #define great_vol A2
-    #define pedal_vol A3
-    #define swell_vol A4  //ennél majd trükközni kell
-
-
-
+#define stops_addr_bus_A0 A11
+#define stops_addr_bus_A1 A12
+#define stops_addr_bus_A2 A13
+#define stops_addr_bus__E A14
+#define stops_addr_bus_DATA A15
 
 
-  // LEDs
-    byte registers[30];  //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást  //EL VAN SZÁMOZVA ÉS TRÜKKOS A RAJZ!
-    byte presets[7];     //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást, a 6os preset a tutti
+
+// Pistons
+
+#define pistons_addr_data_bus_D0 2  //input addr_data bus, csak ha nem egyesítjük a dolgokat, akkor sztem egyszerűbb lesz
+#define pistons_addr_data_bus_D1 3  //egymást követő pineknek kell lenniük, növekvő sorrendben
+#define pistons_addr_data_bus_D2 4
+#define pistons_addr_data_bus_D3 5
+#define pistons_addr_data_bus_D4 6
+
+#define pistons_addr_data_bus__S4_4 44  //ez el van írva a kapcsolási rajzban (_S4_5-re)
+#define pistons_addr_data_bus__S4_5 45
 
 
-  // stops
-    byte stops_cur[30];  //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást
-    byte stops_last[30];
+
+// Volumes
+
+#define reverb_vol A1  //csak analóg pinekre mehetnek!
+#define great_vol A2
+#define pedal_vol A3
+#define swell_vol A4  //ennél majd trükközni kell
 
 
-  // keys
-    byte keys_cur[2][61];  //0: great, 1: swell
-    byte keys_last[2][61];
+// LEDs
+
+byte registers[30];  //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást  //EL VAN SZÁMOZVA ÉS TRÜKKOS A RAJZ!
+byte presets[7];     //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást, a 6os preset a tutti
 
 
-  // pedals
-    byte peds_cur[30];
-    byte peds_last[30];
+// stops
+byte stops_cur[30];  //1-el több elemet hozok létre, hogy indíthassam 1-től a számozást
+byte stops_last[30];
 
 
-  // pistons
-    //0-5: preset
-    //  6: set
-    //  7: mix
-    //  8: T
-    byte pistons_cur[9];
-    byte pistons_last[9];
+// keys
+byte keys_cur[2][61];  //0: great, 1: swell
+byte keys_last[2][61];
 
 
-  // analog
-    int pedal_vol_last;
-    int great_vol_last;
-    int swell_vol_last;
-    int reverb_vol_last;
-//
+// pedals
+byte peds_cur[30];
+byte peds_last[30];
 
+
+// pistons
+//0-5: preset
+//  6: set
+//  7: mix
+//  8: T
+byte pistons_cur[9];
+byte pistons_last[9];
+
+
+// analog
+int pedal_vol_last;
+int great_vol_last;
+int swell_vol_last;
+int reverb_vol_last;
+
+
+// transposer
+int transposer_last = 2;  //a 0-s érték az input data bus 2-es bitjére van kötve (DB2)
 
 
 void MIDI_send(byte status, byte data1, byte data2) {
@@ -471,6 +471,30 @@ void analog_update_and_send(int input, int *last, int channel) {
 
 
 
+void update_transposer(void) {
+  digitalWrite(stops_addr_bus__E, 0);
+  set_A(4);
+
+  for (int i = 0; i <= 6; i--) {
+    if (!digitalRead(input_data_bus_DB0 + i)) {
+      if (i > transposer_last) {
+        MIDI_send(noteOn + transposer_ch, 0, velocity);  // transpose-
+        transposer_last = i;
+        break;
+      } else if (i < transposer_last) {
+        MIDI_send(noteOn + transposer_ch, 1, velocity);  // transpose+
+        transposer_last = i;
+        break;
+      }
+    }
+  }
+
+  set_A(7);
+  digitalWrite(stops_addr_bus__E, 1);
+}
+
+
+
 void pins_setup(void) {
   pinMode(input_data_bus_DB0, INPUT_PULLUP);
   pinMode(input_data_bus_DB1, INPUT_PULLUP);
@@ -578,9 +602,11 @@ void loop() {
   compare_and_send(stops_cur, stops_last, 30, stops_ch, 1);
   compare_and_send(pistons_cur, pistons_last, 9, piston_ch, 0);
 
-  
+
   analog_update_and_send(pedal_vol, &pedal_vol_last, pedal_vol_ch);
-  analog_update_and_send(great_vol, &great_vol_last, great_vol_ch);/*
+  analog_update_and_send(great_vol, &great_vol_last, great_vol_ch); /*
   analog_update_and_send(swell_vol, &swell_vol_last, swell_vol_ch);
   analog_update_and_send(reverb_vol, &reverb_vol_last, reverb_vol_ch);*/
+
+  update_transposer();
 }
