@@ -421,7 +421,7 @@ void update_peds_cur(void) {
   //for(int i=0;i<6;i++)
   //peds_cur[8*3+i] = 1;
   //peds_cur[8*3] = digitalRead(pedal_addr_data_bus_D0);
-  read_bus(pedal_addr_data_bus_D1, peds_cur, 8 * 3, 6);
+  read_bus(pedal_addr_data_bus_D0, peds_cur, 8 * 3, 6);
   digitalWrite(pedal_addr_data_bus__S4_3, 1);
 }
 
