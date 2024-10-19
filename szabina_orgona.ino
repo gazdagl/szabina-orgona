@@ -8,7 +8,7 @@
 #define velocity 127  //a billentyű lenyomás erőssége (ez a maximum érték, és semmi jelentőssége, hogy mennyi, mert nem tudja kezelni az orgona)
 #define lowest_note 36
 #define controller 175  //hangerő szabályzókhoz, 176 = control change, és akkor majd úgy használhatom, hogy controller + channel_number
-#define analog_threshold 32
+#define analog_threshold 4
 
 //csatornák
 #define pedal_ch 1
@@ -172,9 +172,9 @@ void MIDI_read() {
         registers[data1] = 1;
       } else if (status == noteOff + register_ch) {
         registers[data1] = 0;
-      } else if (status == noteOn + preset_ch) {
+      } else if (status == noteOn + preset_ch && data1<=6) {
         presets[data1] = 1;
-      } else if (status == noteOff + preset_ch) {
+      } else if (status == noteOff + preset_ch && data1<=6) {
         presets[data1] = 0;
       }
       update_leds();
@@ -465,6 +465,7 @@ void analog_update_and_send(int input, int *last, int channel) {
   int cur = analogRead(input);
   if (abs(cur - *last) >= analog_threshold) {
     MIDI_send(controller + channel, channel, (byte)map(cur, 0, 1023, 0, 127));
+    //Serial.println(cur);  
     *last = cur;
   }
 }
@@ -475,8 +476,8 @@ void update_transposer(void) {
   digitalWrite(stops_addr_bus__E, 0);
   set_A(4);
 
-  for (int i = 0; i <= 6; i--) {
-    if (!digitalRead(input_data_bus_DB0 + i)) {
+  for (int i = 0; i <= 6; i++) {
+    if (digitalRead(input_data_bus_DB0 + i) == 0) {
       if (i > transposer_last) {
         MIDI_send(noteOn + transposer_ch, 0, velocity);  // transpose-
         transposer_last++;
@@ -604,9 +605,9 @@ void loop() {
 
 
   analog_update_and_send(pedal_vol, &pedal_vol_last, pedal_vol_ch);
-  analog_update_and_send(great_vol, &great_vol_last, great_vol_ch); /*
-  analog_update_and_send(swell_vol, &swell_vol_last, swell_vol_ch);
+  analog_update_and_send(great_vol, &great_vol_last, great_vol_ch); 
+  /*analog_update_and_send(swell_vol, &swell_vol_last, swell_vol_ch);
   analog_update_and_send(reverb_vol, &reverb_vol_last, reverb_vol_ch);*/
 
-  update_transposer();
+  //update_transposer();
 }
